@@ -1,10 +1,15 @@
 # cmdliner
 
-The usage was inspired on [Cleo](https://github.com/sdispater/cleo) .
+The cmdliber library was inspired on [Cleo](https://github.com/sdispater/cleo).
 
 
 ```python
-from cmdliner import Command
+"""
+  A general utility script for testing the cmdliner python library.
+
+  Provides commands that can be used for testing.
+"""
+from cmdliner import Command, Application
 
 
 class GreetCommand(Command):
@@ -12,11 +17,12 @@ class GreetCommand(Command):
     Greets someone
 
     greet
-        {name?'' : Who do you want to greet?}
-        {--y|yell : If set, the task will yell in uppercase letters}
+        name=John : Who do you want to greet?
+        --yell : Yell the name in CAPS ?
+        --times=10 : number of times to repeat
     """
 
-    def handle(self, name, yell):
+    def handle(self, name, yell, times):
         if name:
             text = 'Hello {}'.format(name)
         else:
@@ -24,6 +30,11 @@ class GreetCommand(Command):
 
         if yell:
             text = text.upper()
+        for i in range(times):
+            print(text)
 
-        print(text)
+
+app = Application("cmdliner", "0.0", __doc__)
+app.add(GreetCommand)
+app.run()
 ```
