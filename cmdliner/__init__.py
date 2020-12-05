@@ -1,4 +1,7 @@
 from .application import Application
 from .command import Command
+from .minimal import main
+from .print import verbose
 
-__all_ = [Application, Command]
+
+__all__ = [Application, Command, main, verbose]

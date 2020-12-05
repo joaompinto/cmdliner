@@ -11,16 +11,17 @@ class GreetCommand(Command):
     Greets someone
 
     greet
-        name=John : Who do you want to greet?
+        title : Title of the person to greet
+        name=John : Name of the person
         --yell : Yell the name in CAPS ?
         --times=10 : number of times to repeat
     """
 
     def handle(self, name, yell):
         if name:
-            text = 'Hello {}'.format(name)
+            text = "Hello {}".format(name)
         else:
-            text = 'Hello'
+            text = "Hello"
 
         if yell:
             text = text.upper()

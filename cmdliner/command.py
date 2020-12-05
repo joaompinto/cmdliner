@@ -1,2 +1,2 @@
-class Command():
+class Command:
     pass
