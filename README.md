@@ -1,8 +1,9 @@
 # cmdliner
 
-cmdliner is a python command line parsing library which allows adds command line handling features to your scripts/applications requiring minimal changes to the code.
+Cmdliner is a python command line parsing library focus on extending scripts/applications with command line parsing features while requiring miminal code for the setup.
 
-The minimal use case:
+## Minimal Use Case
+The minimal use case provides `--version` and `-v(vv)` for verbosity:
 ```python
 from cmdliner import cli, verbose
 
@@ -15,12 +16,12 @@ def main():
 
 
 # Instead of calling your main function directly you call cli(), it will handle
-# the argument parsing and invoke the previosly decorated function
+# the argument parsing and invoke the previously decorated function
 if __name__ == "__main__":
     cli()
 ```
 
-# Using it
+Testing:
 ```
 $ python test.py
 hello
