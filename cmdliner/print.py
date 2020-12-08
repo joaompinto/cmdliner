@@ -2,5 +2,5 @@ from cmdliner import singleton
 
 
 def verbose(verbosity, message):
-    if singleton.app.verbosity >= verbosity:
+    if singleton.verbosity >= verbosity:
         print(message)
