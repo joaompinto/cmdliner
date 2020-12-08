@@ -20,6 +20,17 @@ if __name__ == "__main__":
     cli()
 ```
 
+# Using it
+```
+$ python test.py
+hello
+$ python test.py --version
+test.py 1.0
+$ python test.py -v
+hello
+You see this with -v
+```
+
 # How to install
 ```
 pip install cmdliner
