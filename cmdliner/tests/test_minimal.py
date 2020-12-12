@@ -1,5 +1,5 @@
 """
-
+A test utility
 """
 from cmdliner import cli, verbose
 from unittest.mock import patch
@@ -12,9 +12,20 @@ def main():
     verbose(2, "Very verbose mode")
 
 
+@cli("0.0.1", __doc__)
+def doc_main():
+    pass
+
+
 def test_simple(capsys):
     main()
     assert capsys.readouterr().out == "hello\n"
+
+
+def test_doc_help(capsys):
+    with patch("sys.argv", ["program_name", "--help"]):
+        doc_main()
+    assert capsys.readouterr().out == "\nA test utility\n\n"
 
 
 def test_verbose(capsys):

@@ -32,6 +32,30 @@ hello
 You see this with -v
 ```
 
+## Using command line arguments
+```python
+from cmdliner import cli
+
+
+@cli("1.0")
+def main(name, age):
+    print(f"{name} is {age} years old")
+
+
+if __name__ == "__main__":
+    cli()
+```
+
+Result:
+```
+$ python test.py
+Missing required command line parameter 'name' !
+Usage:
+  test.py <name> <age>
+$ python test.py Joe 12
+Joe is 12 years old
+```
+
 # How to install
 ```
 pip install cmdliner
