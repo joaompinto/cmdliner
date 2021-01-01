@@ -1,6 +1,7 @@
 """
 A test utility
 """
+import pytest
 from cmdliner import cli, verbose
 from unittest.mock import patch
 
@@ -12,30 +13,26 @@ def main():
     verbose(2, "Very verbose mode")
 
 
-@cli("0.0.1", __doc__)
-def doc_main():
-    pass
-
-
 def test_simple(capsys):
-    main()
+    with patch("sys.argv", ["program_name"]):
+        main()
     assert capsys.readouterr().out == "hello\n"
 
 
-def test_doc_help(capsys):
-    HELP_OUTPUT = """
-A test utility
+def test_unsupported_switch(capsys):
+    with patch("sys.argv", ["program_name", "--xpto"]):
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            main()
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 2
 
 
-OPTIONS:
-    --help          : print help
-    --version       : print version
-    -v, -vv, -vvv   : set verbose level
-
-"""
-    with patch("sys.argv", ["program_name", "--help"]):
-        doc_main()
-    assert capsys.readouterr().out == HELP_OUTPUT
+def test_unsupported_parameter(capsys):
+    with patch("sys.argv", ["program_name", "something"]):
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            main()
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 3
 
 
 def test_verbose(capsys):

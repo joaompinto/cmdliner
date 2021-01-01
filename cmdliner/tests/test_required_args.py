@@ -17,11 +17,21 @@ def test_missing_parameter(capsys):
             main()
     assert pytest_wrapped_e.type == SystemExit
     assert pytest_wrapped_e.value.code == 1
-    assert capsys.readouterr().out == ""
-    assert capsys.readouterr().err == ""
 
 
 def test_using_parameter(capsys):
     with patch("sys.argv", ["program_name", "Joe"]):
         main()
     assert capsys.readouterr().out == "Hello Joe\n"
+
+
+def test_unsupported_parameter(capsys):
+    with patch("sys.argv", ["program_name", "Joe", "Black"]):
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            main()
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 3
+
+
+if __name__ == "__main__":
+    cli()

@@ -33,6 +33,13 @@ class cli(object):
             if program_args is None:  # exclusive switch was found
                 return
             func_args = self.check_required_args(func, program_args)
+            if len(program_args) > len(func_args):
+                unsupported_args = " ".join(program_args[len(func_args) :])
+                print(
+                    f"Got unsupported extra arguments: {unsupported_args}",
+                    file=sys.stderr,
+                )
+                exit(3)
             result = func(*func_args)
             return result
 

@@ -1,4 +1,6 @@
+import sys
 from cmdliner import cli
+from pathlib import Path
 from unittest.mock import patch
 
 
@@ -10,4 +12,4 @@ def main():
 def test_version(capsys):
     with patch("sys.argv", ["program_name", "--version"]):
         main()
-    assert capsys.readouterr().out == "__main__.py 1.0\n"
+    assert capsys.readouterr().out == f"{Path(sys.argv[0]).name} 1.0\n"
