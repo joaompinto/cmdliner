@@ -16,7 +16,7 @@ def test_missing_parameter(capsys):
         with pytest.raises(SystemExit) as pytest_wrapped_e:
             main()
     assert pytest_wrapped_e.type == SystemExit
-    assert pytest_wrapped_e.value.code == 1
+    assert pytest_wrapped_e.value.code == 3
 
 
 def test_using_parameter(capsys):
