@@ -1,12 +1,11 @@
 import sys
 import argscall.exceptions
-from . import singleton
-from inspect import signature
 from pathlib import Path
 from functools import partial
 from argscall import argsCaller
 from print_err import print_err
-
+from . import singleton
+from .parser import parse
 
 OPTIONS_HELP = """\
 OPTIONS:
@@ -30,14 +29,17 @@ class cli(object):
         if app_version is None:
             singleton.func()
         self.app_version = app_version
-        self.app_doc = app_doc or "Command does not provide any help text."
+        self.app_doc = app_doc
         self.app_name = app_name or Path(sys.argv[0]).name
 
     def __call__(self, func):
+
+        self._set_app_doc(func)
+
         def inner_func():
-            self._gather_program_switches()
-            self._check_unknown_switches()
-            is_exclusive = self._process_program_switches()
+            """ This is the core function handling the parsing """
+            self._gather_global_switches()
+            is_exclusive = self._process_global_switches()
             if is_exclusive:
                 return None
             return self._process_arguments(func)
@@ -45,46 +47,51 @@ class cli(object):
         singleton.func = inner_func
         return inner_func
 
-    def _gather_program_switches(self):
-        # Consider any leading parameter prefixed with "-" as a program switch
-        program_switchs = []
+    def _set_app_doc(self, func):
+        if self.app_doc:
+            return
+        if func.__doc__:
+            app_doc = [x[4:] for x in func.__doc__.splitlines()]
+            app_doc = "\n".join(app_doc)
+        else:
+            app_doc = "Command does not provide any help text."
+        self.app_doc = app_doc
+
+    def _gather_global_switches(self):
+        # Consider any known global switch
+        global_switches = []
         for i, arg in enumerate(sys.argv[1:]):
-            if arg[0] != "-":
+            if arg not in self.options_map:
                 break
-            program_switchs.append(arg)
-        self.program_switchs = program_switchs
+            global_switches.append(arg)
+        self.global_switches = global_switches
+        self.args = sys.argv[len(self.global_switches) + 1 :]
 
-    def _check_unknown_switches(self):
-        unknown_switches = [
-            x for x in self.program_switchs if x not in self.options_map
-        ]
-        if unknown_switches:
-            print_err(f"Unknown switch {unknown_switches[0]} !", exit_code=2)
-
-    def _process_program_switches(self):
-        after_switch_args = sys.argv[len(self.program_switchs) + 1 :]
-        for arg in self.program_switchs:
+    def _process_global_switches(self):
+        for arg in self.global_switches:
             switch_func = self.options_map[arg]
             exclusive_switch = switch_func()
             if exclusive_switch:
-                if after_switch_args:  # exclusive switches do not accept any argumetns
+                if self.args:  # exclusive switches do not accept any argumetns
                     print_err(
-                        "Switch {arg} does not accept extra arguments: {after_switch_args}!",
-                        exit_code=2,
+                        "Switch {arg} does not accept extra arguments: {self.args}!",
+                        exit_code=1,
                     )
                 return True
 
     def _process_arguments(self, func):
-        after_switch_args = sys.argv[len(self.program_switchs) + 1 :]
+        args, kwargs = parse(self.args)
         try:
-            a_caller = argsCaller(func, *after_switch_args)
+            a_caller = argsCaller(func, *args, **kwargs)
         except argscall.exceptions.TooManyArgument as ex:
             print_err(
-                f"Got an unexpected argument: (value '{ex.argument_value}')",
-                exit_code=3,
+                f"Got an unexpected positional argument: (value '{ex.argument_value}')",
+                exit_code=2,
             )
         except argscall.exceptions.MissingArgument as ex:
-            print_err(f"Missing value for argument {ex.argument_name}", exit_code=3)
+            print_err(f"Missing value for argument '{ex.argument_name}'", exit_code=3)
+        except argscall.exceptions.UnsupportedKeyArgument as ex:
+            print_err(f"Missing value for argument '{ex}'", exit_code=4)
         return a_caller.call()
 
     def help(self):
@@ -98,24 +105,3 @@ class cli(object):
 
     def set_verbosity(self, verbosity):
         singleton.verbosity = verbosity
-
-    def check_required_args(self, func, program_args):
-        """
-        This function accepts a function, it parses the function signature to determine
-        the arguments that at
-        eg.
-
-        """
-        args = []
-        i = 1
-        sig = signature(func)
-        for p in sig.parameters.values():
-            print(p.kind)
-        param_str = " ".join([f"<{x}>" for x in sig.parameters])
-        print("PP", param_str)
-        for i, param in enumerate(sig.parameters):
-            if i >= len(program_args):
-                print_err(f"Missing required command line parameter '{param}' !")
-                print_err(f"Usage:\n  {self.app_name} {param_str}", exit_code=1)
-            args.append(program_args[i])
-        return args

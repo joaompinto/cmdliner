@@ -30,7 +30,7 @@ def test_unsupported_parameter(capsys):
         with pytest.raises(SystemExit) as pytest_wrapped_e:
             main()
     assert pytest_wrapped_e.type == SystemExit
-    assert pytest_wrapped_e.value.code == 3
+    assert pytest_wrapped_e.value.code == 2
 
 
 if __name__ == "__main__":
